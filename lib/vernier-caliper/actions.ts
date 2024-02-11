@@ -1,11 +1,7 @@
 'use server'
-import path from 'node:path'
-import { createCanvas, registerFont } from 'canvas'
+import { createCanvas } from 'canvas'
 import { delay } from '../utils'
 import { getQuestion } from '.'
-
-path.resolve(process.cwd(), 'fonts', 'fonts.conf')
-registerFont(path.resolve(process.cwd(), 'fonts', 'OpenSans.ttf'), { family: 'OpenSans' })
 
 // 主尺图片高宽
 const imgHeight = 40
