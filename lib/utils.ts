@@ -8,3 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function rgbToHex(r: number, g: number, b: number) {
   return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`
 }
+
+export function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}

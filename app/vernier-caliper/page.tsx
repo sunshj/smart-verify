@@ -1,0 +1,200 @@
+'use client'
+import { type SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import Link from 'next/link'
+import { createVernierCaliperImage, verifyAnswer } from '@/lib/vernier-caliper'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { createConfetti } from '@/lib/confetti'
+import useThrottle from '@/lib/use-throttle'
+
+export default function VerifyPage() {
+  const [mainImage, setMainImage] = useState('')
+  const [viceImage, setViceImage] = useState('')
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState(0)
+
+  const [userAnswer, setUserAnswer] = useState(0)
+  const [isCorrect, setIsCorrect] = useState(false)
+
+  const [resetCount, setResetCount] = useState(0)
+  const [isSelected, setIsSelected] = useState(false)
+  const [mouseTempLeftMove, setMouseTempLeftMove] = useState(0)
+  const [mouseLeftMove, setMouseLeftMove] = useState(0)
+
+  const viceCaliperRef = useRef<HTMLDivElement | null>(null)
+  const pressInterval = useRef<NodeJS.Timeout | null>(null)
+
+  const pending = useMemo(() => !mainImage || !viceImage, [mainImage, viceImage])
+
+  const onLeftControllerHoldDown = (e: SyntheticEvent) => {
+    e.nativeEvent.preventDefault()
+    pressInterval.current = setInterval(() => {
+      setUserAnswer(prev => prev - 1)
+    }, 100)
+  }
+
+  const onRightControllerHoldDown = (e: SyntheticEvent) => {
+    e.nativeEvent.preventDefault()
+    pressInterval.current = setInterval(() => {
+      setUserAnswer(prev => prev + 1)
+    }, 100)
+  }
+  const onControllerHoldUp = () => {
+    if (pressInterval) clearInterval(pressInterval.current!)
+  }
+
+  const getX = (e: MouseEvent | TouchEvent) => {
+    if (e && 'touches' in e) {
+      return e.touches[0].screenX
+    }
+    if (e && 'screenX' in e) {
+      return e.screenX
+    }
+    return 0
+  }
+
+  const onMouseUp = useCallback(() => {
+    setIsSelected(false)
+    setMouseTempLeftMove(userAnswer)
+  }, [userAnswer])
+
+  const onMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
+    e.preventDefault()
+    setMouseLeftMove(getX(e))
+    setIsSelected(true)
+  }, [])
+
+  const onMouseMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isSelected) return
+      setUserAnswer(mouseTempLeftMove + getX(e) - mouseLeftMove)
+    },
+    [isSelected, mouseLeftMove, mouseTempLeftMove]
+  )
+
+  useEffect(() => {
+    createVernierCaliperImage().then(({ mainImageBase64, viceImageBase64, question, answer }) => {
+      setMainImage(mainImageBase64)
+      setViceImage(viceImageBase64)
+      setQuestion(question)
+      setAnswer(answer)
+    })
+  }, [resetCount])
+
+  useEffect(() => {
+    const viceCaliper = viceCaliperRef.current
+    if (!viceCaliper) return
+
+    viceCaliper.addEventListener('mouseup', onMouseUp)
+    viceCaliper.addEventListener('touchend', onMouseUp, { passive: false })
+
+    viceCaliper.addEventListener('mousedown', onMouseDown)
+    viceCaliper.addEventListener('touchstart', onMouseDown, { passive: false })
+
+    viceCaliper.addEventListener('mousemove', onMouseMove)
+    viceCaliper.addEventListener('touchmove', onMouseMove, { passive: false })
+
+    return () => {
+      viceCaliper.removeEventListener('mouseup', onMouseUp)
+      viceCaliper.removeEventListener('touchend', onMouseUp)
+
+      viceCaliper.removeEventListener('mousedown', onMouseDown)
+      viceCaliper.removeEventListener('touchstart', onMouseDown)
+
+      viceCaliper.removeEventListener('mousemove', onMouseMove)
+      viceCaliper.removeEventListener('touchmove', onMouseMove)
+    }
+  }, [onMouseDown, onMouseMove, onMouseUp])
+
+  const reset = () => {
+    setUserAnswer(0)
+    setResetCount(prev => prev + 1)
+  }
+
+  const submit = useThrottle(() => {
+    const result = verifyAnswer(userAnswer, answer)
+    if (!result) {
+      setIsCorrect(false)
+      reset()
+      toast.error('验证失败，已重置')
+      return
+    }
+    toast.success('验证成功')
+    setIsCorrect(true)
+    createConfetti()
+  }, 1000)
+
+  return (
+    <div className="flex justify-center items-center h-full">
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle>游标卡尺</CardTitle>
+          <CardDescription>拖动副尺使游标卡尺的读数为 {question}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          <div className="w-full overflow-hidden relative">
+            <div className="relative h-10">
+              <img
+                loading="lazy"
+                src={mainImage}
+                alt="main-caliper-image"
+                className="absolute top-0 left-0 h-full w-full"
+              />
+            </div>
+            <div className="relative h-10" ref={viceCaliperRef}>
+              <img
+                className="absolute top-0 left-0 h-full w-full"
+                src={viceImage}
+                alt="vice-caliper-image"
+                style={{ left: `${userAnswer}px` }}
+              />
+            </div>
+            <button
+              className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150"
+              onMouseDown={onLeftControllerHoldDown}
+              onMouseUp={onControllerHoldUp}
+              onTouchStart={onLeftControllerHoldDown}
+              onTouchEnd={onControllerHoldUp}
+              onClick={() => setUserAnswer(prev => prev - 1)}
+            >
+              ⬅
+            </button>
+            <button
+              className="absolute right-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150"
+              onMouseDown={onRightControllerHoldDown}
+              onMouseUp={onControllerHoldUp}
+              onTouchStart={onRightControllerHoldDown}
+              onTouchEnd={onControllerHoldUp}
+              onClick={() => setUserAnswer(prev => prev + 1)}
+            >
+              ➡
+            </button>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end gap-2">
+          <Button disabled={pending} variant="secondary" onClick={reset}>
+            重置
+          </Button>
+          {!isCorrect && (
+            <Button disabled={pending} onClick={submit}>
+              提交
+            </Button>
+          )}
+          {isCorrect && (
+            <Link href="/linear-gradient" scroll={false}>
+              <Button>下一个</Button>
+            </Link>
+          )}
+        </CardFooter>
+      </Card>
+    </div>
+  )
+}

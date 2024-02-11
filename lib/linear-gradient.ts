@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { createCanvas } from 'canvas'
 import { rgbToHex } from './utils'
 
-export async function createCaptchaImage() {
+export async function createLinearGradientImage() {
   const width = 400
   const height = 100
 
@@ -25,13 +25,9 @@ export async function createCaptchaImage() {
   ctx.fillStyle = linearGradient
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  const buffer = canvas.toBuffer('image/png')
   return {
-    startFill,
-    endFill,
-    alpha,
     hashedColor,
-    dataURL: `data:image/png;base64,${buffer.toString('base64')}`
+    dataURL: canvas.toDataURL()
   }
 }
 
