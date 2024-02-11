@@ -9,7 +9,7 @@ const imgWidth = 300
 const fontSize = 10 // 文字大小
 const backgroundColor = '#ddd' // 背景颜色
 const fontColor = '#000' // 字体颜色、刻度颜色
-const fontInfo = `${fontSize}px`
+// const fontInfo = `${fontSize}px`
 const paddingLeft = 5 // 主尺刻度距离左边的距离
 const unit = 'mm'
 
@@ -79,7 +79,7 @@ export async function createVernierCaliperImage() {
     ctx.moveTo(x, height)
     ctx.lineTo(x, height - lineHeight) // 画刻度
     if (numberStr) {
-      ctx.font = fontInfo
+      // ctx.font = fontInfo
       ctx.fillText(numberStr, x, fontSize + 10)
     }
     ctx.stroke()
@@ -105,7 +105,7 @@ export async function createVernierCaliperImage() {
     viceCtx.moveTo(x, 0)
     viceCtx.lineTo(x, lineHeight)
     if (showNumber) {
-      viceCtx.font = fontInfo
+      // viceCtx.font = fontInfo
       viceCtx.fillText(i.toString(), x, fontSize + lineHeight)
     }
     viceCtx.stroke()
