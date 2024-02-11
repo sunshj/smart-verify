@@ -1,7 +1,11 @@
 'use server'
-import { createCanvas } from 'canvas'
+import path from 'node:path'
+import { createCanvas, registerFont } from 'canvas'
 import { delay } from '../utils'
 import { getQuestion } from '.'
+
+path.resolve(process.cwd(), 'fonts', 'fonts.conf')
+registerFont(path.resolve(process.cwd(), 'fonts', 'OpenSans.ttf'), { family: 'OpenSans' })
 
 // 主尺图片高宽
 const imgHeight = 40
@@ -9,7 +13,7 @@ const imgWidth = 300
 const fontSize = 10 // 文字大小
 const backgroundColor = '#ddd' // 背景颜色
 const fontColor = '#000' // 字体颜色、刻度颜色
-const fontInfo = `${fontSize}px sans-serif,sans`
+const fontInfo = `${fontSize}px OpenSans`
 const paddingLeft = 5 // 主尺刻度距离左边的距离
 const unit = 'mm'
 
