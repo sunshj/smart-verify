@@ -116,6 +116,8 @@ export default function VerifyPage() {
 
   const reset = () => {
     setUserAnswer(0)
+    onControllerHoldUp()
+    setIsCorrect(false)
     setResetCount(prev => prev + 1)
   }
 
@@ -158,9 +160,10 @@ export default function VerifyPage() {
               />
             </div>
             <button
-              className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150"
+              className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
               onMouseDown={onLeftControllerHoldDown}
               onMouseUp={onControllerHoldUp}
+              onMouseLeave={onControllerHoldUp}
               onTouchStart={onLeftControllerHoldDown}
               onTouchEnd={onControllerHoldUp}
               onClick={() => setUserAnswer(prev => prev - 1)}
@@ -168,9 +171,10 @@ export default function VerifyPage() {
               ⬅
             </button>
             <button
-              className="absolute right-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150"
+              className="absolute right-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
               onMouseDown={onRightControllerHoldDown}
               onMouseUp={onControllerHoldUp}
+              onMouseLeave={onControllerHoldUp}
               onTouchStart={onRightControllerHoldDown}
               onTouchEnd={onControllerHoldUp}
               onClick={() => setUserAnswer(prev => prev + 1)}
