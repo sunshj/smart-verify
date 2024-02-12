@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "lib/vernier-caliper/actions.ts": {
+      "includeFiles": "fonts/**"
+    }
+  }
+}

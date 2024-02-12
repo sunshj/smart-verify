@@ -1,7 +1,9 @@
 'use server'
-import { createCanvas } from 'canvas'
+import { createCanvas, registerFont } from 'canvas'
 import { delay } from '../utils'
 import { getQuestion } from '.'
+
+registerFont('./fonts/OpenSans.ttf', { family: 'OpenSans' })
 
 // 主尺图片高宽
 const imgHeight = 40
