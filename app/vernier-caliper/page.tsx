@@ -144,20 +144,34 @@ export default function VerifyPage() {
         <CardContent className="flex flex-col gap-2">
           <div className="w-full overflow-hidden relative">
             <div className="relative h-10">
-              <img
-                loading="lazy"
-                src={mainImage}
-                alt="main-caliper-image"
-                className="absolute top-0 left-0 h-full w-full"
-              />
+              {pending && (
+                <div className="animate-pulse flex justify-center items-center h-full">
+                  加载主尺中...
+                </div>
+              )}
+              {!pending && (
+                <img
+                  loading="lazy"
+                  src={mainImage}
+                  alt="main-caliper-image"
+                  className="absolute top-0 left-0 h-full w-full"
+                />
+              )}
             </div>
             <div className="relative h-10" ref={viceCaliperRef}>
-              <img
-                className="absolute top-0 left-0 h-full w-full"
-                src={viceImage}
-                alt="vice-caliper-image"
-                style={{ left: `${userAnswer}px` }}
-              />
+              {pending && (
+                <div className="animate-pulse flex justify-center items-center h-full">
+                  加载副尺中...
+                </div>
+              )}
+              {!pending && (
+                <img
+                  className="absolute top-0 left-0 h-full w-full"
+                  src={viceImage}
+                  alt="vice-caliper-image"
+                  style={{ left: `${userAnswer}px` }}
+                />
+              )}
             </div>
             <button
               className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"

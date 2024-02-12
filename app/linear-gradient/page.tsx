@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { compareHashedColor, createLinearGradientImage } from '@/lib/linear-gradient'
@@ -11,6 +11,7 @@ export default function App() {
   const [captchaImage, setCaptchaImage] = useState('')
   const [hashedColor, setHashedColor] = useState('')
   const [resetCount, setResetCount] = useState(0)
+  const pending = useMemo(() => !captchaImage, [captchaImage])
 
   useEffect(() => {
     createLinearGradientImage().then(({ dataURL, hashedColor }) => {
@@ -39,12 +40,19 @@ export default function App() {
           <CardDescription>请选择正确的起止颜色值和透明度</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <div id="captcha" className="w-full h-10 bg-slate-50">
-            <img
-              className="w-full h-full rounded-sm"
-              src={captchaImage}
-              alt="linear-gradient-image"
-            />
+          <div id="captcha" className="w-full h-10">
+            {pending && (
+              <div className="animate-pulse flex justify-center items-center h-full border rounded-sm">
+                加载中...
+              </div>
+            )}
+            {!pending && (
+              <img
+                className="w-full h-full rounded-sm"
+                src={captchaImage}
+                alt="linear-gradient-image"
+              />
+            )}
           </div>
           <ColorForm onSubmit={handleSubmit} />
         </CardContent>

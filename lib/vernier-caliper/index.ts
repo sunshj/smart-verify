@@ -1,7 +1,7 @@
 export * from './actions'
 
 export function verifyAnswer(input: number, answer: number) {
-  return input <= answer + 1 && input >= answer - 1
+  return Math.abs(input - answer) <= 1
 }
 
 export function getQuestion(options: {
