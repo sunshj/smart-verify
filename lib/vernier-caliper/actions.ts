@@ -1,5 +1,6 @@
 'use server'
-import { createCanvas } from 'canvas'
+import path from 'node:path'
+import { createCanvas, registerFont } from 'canvas'
 import { delay } from '../utils'
 import { getQuestion } from '.'
 
@@ -9,11 +10,12 @@ const imgWidth = 300
 const fontSize = 10 // 文字大小
 const backgroundColor = '#ddd' // 背景颜色
 const fontColor = '#000' // 字体颜色、刻度颜色
-const fontInfo = `${fontSize}px sans,sans-serif`
+const fontInfo = `${fontSize}px OpenSans`
 const paddingLeft = 5 // 主尺刻度距离左边的距离
 const unit = 'mm'
 
 export async function createVernierCaliperImage() {
+  registerFont(path.join(process.cwd(), 'public', 'fonts', 'OpenSans.ttf'), { family: 'OpenSans' })
   // 主尺刻度范围 最小值在0到50，最大值在最小值的基础上增加30到35
   const minNum = Math.round(Math.random() * 50)
   const maxNum = minNum + Math.round(Math.random() * 5 + 30)
