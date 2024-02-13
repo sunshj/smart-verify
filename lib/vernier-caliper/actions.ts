@@ -1,17 +1,17 @@
 'use server'
 import { createCanvas } from 'canvas'
 import bcrypt from 'bcryptjs'
-import { getQuestion } from '.'
-
-// 主尺图片高宽
-const imgHeight = 40
-const imgWidth = 300
-const fontSize = 10 // 文字大小
-const backgroundColor = '#ddd' // 背景颜色
-const fontColor = '#000' // 字体颜色、刻度颜色
-const fontInfo = `${fontSize}px sans,sans-serif`
-const paddingLeft = 5 // 主尺刻度距离左边的距离
-const unit = 'mm'
+import {
+  backgroundColor,
+  fontColor,
+  fontInfo,
+  fontSize,
+  getQuestion,
+  imgHeight,
+  imgWidth,
+  paddingLeft,
+  unit
+} from '.'
 
 export async function createVernierCaliperImage() {
   // 主尺刻度范围 最小值在0到50，最大值在最小值的基础上增加30到35
@@ -116,8 +116,7 @@ export async function createVernierCaliperImage() {
     minNum,
     maxNum,
     unitWidth,
-    vicePaddingLeft,
-    unit
+    vicePaddingLeft
   })
   const allowAnswers = [answer - 0.5, answer, answer + 0.5].map(v => Math.round(v).toString(10))
   const hashedAnswers = await Promise.all(allowAnswers.map(ans => bcrypt.hash(ans, 10)))

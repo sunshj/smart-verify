@@ -1,21 +1,23 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { compareHashedColor, createLinearGradientImage } from '@/lib/linear-gradient'
+import { compareHashedColor, createLinearGradientImage } from '@/lib/linear-gradient/actions'
 import ColorForm, { type ColorFormProps } from '@/components/ColorForm'
 import { createConfetti } from '@/lib/confetti'
 import useThrottle from '@/lib/use-throttle'
+import type { LinearGradientCaptchaResult } from '@/lib/linear-gradient'
 
-export default function App() {
-  const [captchaImage, setCaptchaImage] = useState('')
+export default function LinearGradientPage() {
+  const [image, setImage] = useState<LinearGradientCaptchaResult['image']>()
   const [hashedColor, setHashedColor] = useState('')
   const [resetCount, setResetCount] = useState(0)
-  const pending = useMemo(() => !captchaImage, [captchaImage])
+  const pending = useMemo(() => !image, [image])
 
   useEffect(() => {
-    createLinearGradientImage().then(({ dataURL, hashedColor }) => {
-      setCaptchaImage(dataURL)
+    createLinearGradientImage().then(({ image, hashedColor }) => {
+      setImage(image)
       setHashedColor(hashedColor)
     })
   }, [resetCount])
@@ -40,16 +42,19 @@ export default function App() {
           <CardDescription>请选择正确的起止颜色值和透明度</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <div id="captcha" className="w-full h-10">
+          <div className="w-full h-10">
             {pending && (
               <div className="animate-pulse flex justify-center items-center h-full border rounded-sm">
                 加载中...
               </div>
             )}
-            {!pending && (
-              <img
+            {image && (
+              <Image
+                draggable={false}
                 className="w-full h-full rounded-sm"
-                src={captchaImage}
+                src={image?.base64}
+                width={image?.width}
+                height={image?.height}
                 alt="linear-gradient-image"
               />
             )}

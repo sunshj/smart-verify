@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { createConfetti } from '@/lib/confetti'
 import useThrottle from '@/lib/use-throttle'
 
-export default function VerifyPage() {
+export default function VernierCaliperPage() {
   const [mainImage, setMainImage] = useState('')
   const [viceImage, setViceImage] = useState('')
   const [question, setQuestion] = useState('')
@@ -151,6 +151,7 @@ export default function VerifyPage() {
               )}
               {!pending && (
                 <img
+                  draggable={false}
                   loading="lazy"
                   src={mainImage}
                   alt="main-caliper-image"

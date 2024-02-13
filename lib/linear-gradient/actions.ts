@@ -1,20 +1,17 @@
 'use server'
 import bcrypt from 'bcryptjs'
 import { createCanvas } from 'canvas'
-import { rgbToHex } from './utils'
+import { randomHexColor } from '../utils'
+import { type LinearGradientCaptchaResult, imageHeight, imageWidth } from '.'
 
-export async function createLinearGradientImage() {
-  const width = 400
-  const height = 100
-
-  const randomRGBValue = () => Math.floor(Math.random() * 256)
-  const startFill = rgbToHex(randomRGBValue(), randomRGBValue(), randomRGBValue())
-  const endFill = rgbToHex(randomRGBValue(), randomRGBValue(), randomRGBValue())
+export async function createLinearGradientImage(): Promise<LinearGradientCaptchaResult> {
+  const startFill = randomHexColor()
+  const endFill = randomHexColor()
   const alpha = Number.parseFloat(Math.random().toFixed(1))
 
   const hashedColor = await bcrypt.hash(`${startFill}-${endFill}-${alpha}`, 10)
 
-  const canvas = createCanvas(width, height)
+  const canvas = createCanvas(imageWidth, imageHeight)
   const ctx = canvas.getContext('2d')
 
   const linearGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
@@ -27,7 +24,11 @@ export async function createLinearGradientImage() {
 
   return {
     hashedColor,
-    dataURL: canvas.toDataURL()
+    image: {
+      base64: canvas.toDataURL(),
+      width: imageWidth,
+      height: imageHeight
+    }
   }
 }
 
