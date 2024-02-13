@@ -3,7 +3,6 @@ export * from './types'
 
 // 验证图图片大小(正方形图片)
 export const imageSize = 300
-export const bgImagePath = '/touch-captcha-bg.jpg'
 // 绘制文字大小
 export const fontSize = 40
 export const fontInfo = `bold ${fontSize}px Sans`
