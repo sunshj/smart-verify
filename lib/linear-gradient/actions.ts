@@ -7,7 +7,7 @@ import { type LinearGradientCaptchaResult, imageHeight, imageWidth } from '.'
 export async function createLinearGradientImage(): Promise<LinearGradientCaptchaResult> {
   const startFill = randomHexColor()
   const endFill = randomHexColor()
-  const alpha = Number.parseFloat(Math.random().toFixed(1))
+  const alpha = Number.parseFloat(Math.random().toFixed(1)) || 0.1
 
   const hashedColor = await bcrypt.hash(`${startFill}-${endFill}-${alpha}`, 10)
 

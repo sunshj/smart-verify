@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-type ThrottledFunction<T extends unknown[]> = (...args: T) => void
-
-export default function useThrottle<T extends unknown[]>(
-  fn: ThrottledFunction<T>,
+export default function useThrottle<T extends unknown[], R>(
+  fn: (...args: T) => R,
   delay = 2000,
   dep: unknown[] = []
-) {
-  const { current } = useRef<{ fn: ThrottledFunction<T>; timer: NodeJS.Timeout | null }>({
+): (...args: T) => R {
+  const { current } = useRef<{ fn: (...args: T) => R; timer: NodeJS.Timeout | null }>({
     fn,
     timer: null
   })
@@ -16,12 +14,12 @@ export default function useThrottle<T extends unknown[]>(
     current.fn = fn
   }, [fn])
 
-  return useCallback(function (this: unknown, ...args: T) {
+  return useCallback(function (this: unknown, ...args: T): any {
     if (!current.timer) {
       current.timer = setTimeout(() => {
         current.timer = null
       }, delay)
-      current.fn.apply(this, args)
+      return current.fn.apply(this, args)
     }
   }, dep)
 }

@@ -2,6 +2,7 @@
 import { type SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import { createVernierCaliperImage, verifyAnswer } from '@/lib/vernier-caliper'
 import {
   Card,
@@ -23,6 +24,7 @@ export default function VernierCaliperPage() {
 
   const [userAnswer, setUserAnswer] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [resetCount, setResetCount] = useState(0)
   const [isSelected, setIsSelected] = useState(false)
@@ -118,11 +120,13 @@ export default function VernierCaliperPage() {
     setUserAnswer(0)
     onControllerHoldUp()
     setIsCorrect(false)
+    setIsSubmitting(false)
     setResetCount(prev => prev + 1)
   }
 
   const submit = useThrottle(async () => {
-    const result = await verifyAnswer(userAnswer, answers)
+    setIsSubmitting(true)
+    const result = await verifyAnswer(userAnswer, answers).finally(() => setIsSubmitting(false))
     if (!result) {
       setIsCorrect(false)
       reset()
@@ -204,6 +208,7 @@ export default function VernierCaliperPage() {
           </Button>
           {!isCorrect && (
             <Button disabled={pending} onClick={submit}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               提交
             </Button>
           )}

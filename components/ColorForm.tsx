@@ -1,7 +1,8 @@
 'use client'
-import { type UseFormReturn, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
 import {
   Form,
   FormControl,
@@ -14,16 +15,13 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 
 export interface ColorFormProps {
-  onSubmit: (
-    data: z.infer<typeof FormSchema>,
-    form: UseFormReturn<z.infer<typeof FormSchema>>
-  ) => void
+  onSubmit: (values: z.infer<typeof FormSchema>) => Promise<boolean>
 }
 
 const FormSchema = z.object({
   startFill: z.string(),
   endFill: z.string(),
-  alpha: z.coerce.number().step(0.1).min(0).max(1)
+  alpha: z.coerce.number().step(0.1).min(0.1).max(1)
 })
 
 export default function ColorForm(props: ColorFormProps) {
@@ -36,8 +34,12 @@ export default function ColorForm(props: ColorFormProps) {
     }
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    props.onSubmit(data, form)
+  async function onSubmit(values: z.infer<typeof FormSchema>) {
+    const result = await props.onSubmit(values)
+    if (!result) {
+      form.reset()
+    }
+    return result
   }
 
   return (
@@ -77,7 +79,7 @@ export default function ColorForm(props: ColorFormProps) {
               <FormItem className="flex-1">
                 <FormLabel>透明度</FormLabel>
                 <FormControl>
-                  <Input type="number" step={0.1} min={0} max={1} {...field} />
+                  <Input type="number" step={0.1} min={0.1} max={1} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,6 +89,7 @@ export default function ColorForm(props: ColorFormProps) {
 
         <div className="flex justify-end">
           <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             提交
           </Button>
         </div>

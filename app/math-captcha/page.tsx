@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -29,6 +30,7 @@ export default function NumberPlusPage() {
 
   const [resetCount, setResetCount] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const pending = useMemo(() => !image, [image])
 
@@ -42,12 +44,16 @@ export default function NumberPlusPage() {
   const reset = () => {
     setUserAnswer('')
     setIsCorrect(false)
+    setIsSubmitting(false)
     setResetCount(prev => prev + 1)
   }
 
   const submit = useThrottle(async () => {
     if (!userAnswer) return toast.error('请输入答案')
-    const result = await verifyMathCaptcha(Number(userAnswer), answer)
+    setIsSubmitting(true)
+    const result = await verifyMathCaptcha(Number(userAnswer), answer).finally(() =>
+      setIsSubmitting(false)
+    )
     if (!result) {
       toast.error('验证失败，已重置')
       reset()
@@ -103,6 +109,7 @@ export default function NumberPlusPage() {
           </Button>
           {!isCorrect && (
             <Button disabled={pending} onClick={submit}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               提交
             </Button>
           )}

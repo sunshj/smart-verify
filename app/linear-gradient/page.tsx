@@ -13,6 +13,7 @@ export default function LinearGradientPage() {
   const [image, setImage] = useState<LinearGradientCaptchaResult['image']>()
   const [hashedColor, setHashedColor] = useState('')
   const [resetCount, setResetCount] = useState(0)
+
   const pending = useMemo(() => !image, [image])
 
   useEffect(() => {
@@ -22,16 +23,20 @@ export default function LinearGradientPage() {
     })
   }, [resetCount])
 
-  const handleSubmit: ColorFormProps['onSubmit'] = useThrottle(async (values, form) => {
+  const reset = () => {
+    setResetCount(prev => prev + 1)
+  }
+
+  const handleSubmit: ColorFormProps['onSubmit'] = useThrottle(async values => {
     const success = await compareHashedColor(Object.values(values).join('-'), hashedColor)
     if (!success) {
       toast.error('验证失败，已重置')
-      setResetCount(prev => prev + 1)
-      form.reset()
-      return
+      reset()
+    } else {
+      toast.success('验证通过')
+      createConfetti()
     }
-    toast.success('验证通过')
-    createConfetti()
+    return success
   }, 1000)
 
   return (

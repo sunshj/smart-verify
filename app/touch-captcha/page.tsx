@@ -3,6 +3,7 @@ import { type MouseEventHandler, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import {
   type CaptchaAnswer,
   type TouchCaptchaResult,
@@ -31,6 +32,7 @@ export default function TouchCaptchaPage() {
 
   const [resetCount, setResetCount] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     createTouchCaptchaImage().then(({ image, answer, question }) => {
@@ -52,13 +54,17 @@ export default function TouchCaptchaPage() {
   const reset = () => {
     setUserAnswer([])
     setIsCorrect(false)
+    setIsSubmitting(false)
     setResetCount(prev => prev + 1)
   }
 
   const submit = useThrottle(async () => {
     if (userAnswer.length !== 3 || !image?.base64 || answer.length === 0)
       return toast.error('请先完成验证')
-    const result = await verifyTouchCaptcha(userAnswer, { image, answer })
+    setIsSubmitting(true)
+    const result = await verifyTouchCaptcha(userAnswer, { image, answer }).finally(() =>
+      setIsSubmitting(false)
+    )
     if (!result) {
       toast.error('验证失败，已重置')
       reset()
@@ -118,6 +124,7 @@ export default function TouchCaptchaPage() {
           </Button>
           {!isCorrect && (
             <Button disabled={pending} onClick={submit}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               提交
             </Button>
           )}
