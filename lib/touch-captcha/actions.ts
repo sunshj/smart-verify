@@ -1,9 +1,15 @@
 'use server'
-import fs from 'node:fs'
-import path from 'node:path'
 import { createCanvas, loadImage } from 'canvas'
 import { delay, randomIn, shuffleArray } from '../utils'
-import { chineseChars, fontInfo, fontSize, imageSize, noiseDensity, predefinePosition } from '.'
+import {
+  bgImagePath,
+  chineseChars,
+  fontInfo,
+  fontSize,
+  imageSize,
+  noiseDensity,
+  predefinePosition
+} from '.'
 import type { TouchCaptchaResult, UserAnswer } from './types'
 
 export async function createTouchCaptchaImage(): Promise<TouchCaptchaResult> {
@@ -11,8 +17,7 @@ export async function createTouchCaptchaImage(): Promise<TouchCaptchaResult> {
   const ctx = canvas.getContext('2d')
 
   // 绘制背景图
-  const backgroundImagePath = await getRandomBackgroundImage()
-  const image = await loadImage(backgroundImagePath)
+  const image = await loadImage(bgImagePath)
   ctx.drawImage(image, 0, 0, imageSize, imageSize)
 
   // 总共绘制6个文字，3个正确文字
@@ -134,12 +139,4 @@ export async function verifyTouchCaptcha(
     if (distance > radius) return false
   }
   return true
-}
-
-// 从public/captcha文件夹中随机获取一张图片
-async function getRandomBackgroundImage() {
-  const captchaImageDir = path.join(process.cwd(), 'public', 'captcha')
-  const files = await fs.promises.readdir(captchaImageDir)
-  const fileName = files[randomIn(files.length, 0)]
-  return `${captchaImageDir}/${fileName}`
 }
