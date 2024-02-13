@@ -130,6 +130,8 @@ export async function createVernierCaliperImage() {
 }
 
 export async function verifyAnswer(input: number, answers: string[]) {
-  const result = await Promise.all(answers.map(ans => bcrypt.compare(input.toString(), ans)))
+  const result = await Promise.all(
+    answers.map(ans => bcrypt.compare(Math.round(input).toString(10), ans))
+  )
   return result.some(Boolean)
 }
