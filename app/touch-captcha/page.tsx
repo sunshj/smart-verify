@@ -106,7 +106,7 @@ export default function TouchCaptchaPage() {
                     top: `${point.y - 10}px`
                   }}
                 >
-                  {index}
+                  {index + 1}
                 </div>
               ))}
             </div>
