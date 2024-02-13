@@ -1,6 +1,6 @@
 'use server'
 import { createCanvas } from 'canvas'
-import { delay } from '../utils'
+import bcrypt from 'bcryptjs'
 import { getQuestion } from '.'
 
 // 主尺图片高宽
@@ -119,12 +119,18 @@ export async function createVernierCaliperImage() {
     vicePaddingLeft,
     unit
   })
+  const allowAnswers = [answer - 0.5, answer, answer + 0.5].map(v => Math.round(v).toString(10))
+  const hashedAnswers = await Promise.all(allowAnswers.map(ans => bcrypt.hash(ans, 10)))
 
-  await delay(1)
   return {
     question,
-    answer,
+    answers: hashedAnswers,
     mainImageBase64: canvas.toDataURL(),
     viceImageBase64: viceCanvas.toDataURL()
   }
+}
+
+export async function verifyAnswer(input: number, answers: string[]) {
+  const result = await Promise.all(answers.map(ans => bcrypt.compare(input.toString(), ans)))
+  return result.some(Boolean)
 }

@@ -1,9 +1,5 @@
 export * from './actions'
 
-export function verifyAnswer(input: number, answer: number) {
-  return Math.abs(input - answer) <= 1
-}
-
 export function getQuestion(options: {
   maxNum: number
   minNum: number

@@ -19,7 +19,7 @@ export default function VerifyPage() {
   const [mainImage, setMainImage] = useState('')
   const [viceImage, setViceImage] = useState('')
   const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState(0)
+  const [answers, setAnswers] = useState<string[]>([])
 
   const [userAnswer, setUserAnswer] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
@@ -81,11 +81,11 @@ export default function VerifyPage() {
   )
 
   useEffect(() => {
-    createVernierCaliperImage().then(({ mainImageBase64, viceImageBase64, question, answer }) => {
+    createVernierCaliperImage().then(({ mainImageBase64, viceImageBase64, question, answers }) => {
       setMainImage(mainImageBase64)
       setViceImage(viceImageBase64)
       setQuestion(question)
-      setAnswer(answer)
+      setAnswers(answers)
     })
   }, [resetCount])
 
@@ -121,8 +121,8 @@ export default function VerifyPage() {
     setResetCount(prev => prev + 1)
   }
 
-  const submit = useThrottle(() => {
-    const result = verifyAnswer(userAnswer, answer)
+  const submit = useThrottle(async () => {
+    const result = await verifyAnswer(userAnswer, answers)
     if (!result) {
       setIsCorrect(false)
       reset()
