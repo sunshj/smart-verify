@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
+import Providers from '@/components/providers'
 import type { Metadata } from 'next'
 import './globals.css'
 
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
+        <Providers>{children}</Providers>
         <Toaster richColors position="top-center" />
       </body>
     </html>

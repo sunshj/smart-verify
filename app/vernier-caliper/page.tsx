@@ -25,6 +25,7 @@ export default function VernierCaliperPage() {
   const [userAnswer, setUserAnswer] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState(null)
 
   const [resetCount, setResetCount] = useState(0)
   const [isSelected, setIsSelected] = useState(false)
@@ -49,8 +50,9 @@ export default function VernierCaliperPage() {
       setUserAnswer(prev => prev + 1)
     }, 100)
   }
+
   const onControllerHoldUp = () => {
-    if (pressInterval) clearInterval(pressInterval.current!)
+    if (pressInterval.current) clearInterval(pressInterval.current)
   }
 
   const getX = (e: MouseEvent | TouchEvent) => {
@@ -64,8 +66,8 @@ export default function VernierCaliperPage() {
   }
 
   const onMouseUp = useCallback(() => {
-    setIsSelected(false)
     setMouseTempLeftMove(userAnswer)
+    setIsSelected(false)
   }, [userAnswer])
 
   const onMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
@@ -83,13 +85,17 @@ export default function VernierCaliperPage() {
   )
 
   useEffect(() => {
-    createVernierCaliperImage().then(({ mainImageBase64, viceImageBase64, question, answers }) => {
-      setMainImage(mainImageBase64)
-      setViceImage(viceImageBase64)
-      setQuestion(question)
-      setAnswers(answers)
-    })
+    createVernierCaliperImage()
+      .then(({ mainImageBase64, viceImageBase64, question, answers }) => {
+        setMainImage(mainImageBase64)
+        setViceImage(viceImageBase64)
+        setQuestion(question)
+        setAnswers(answers)
+      })
+      .catch(error => setError(error))
   }, [resetCount])
+
+  if (error) throw error
 
   useEffect(() => {
     const viceCaliper = viceCaliperRef.current
@@ -97,6 +103,8 @@ export default function VernierCaliperPage() {
 
     viceCaliper.addEventListener('mouseup', onMouseUp)
     viceCaliper.addEventListener('touchend', onMouseUp, { passive: false })
+
+    viceCaliper.addEventListener('mouseleave', onMouseUp)
 
     viceCaliper.addEventListener('mousedown', onMouseDown)
     viceCaliper.addEventListener('touchstart', onMouseDown, { passive: false })
@@ -107,6 +115,7 @@ export default function VernierCaliperPage() {
     return () => {
       viceCaliper.removeEventListener('mouseup', onMouseUp)
       viceCaliper.removeEventListener('touchend', onMouseUp)
+      viceCaliper.removeEventListener('mouseleave', onMouseUp)
 
       viceCaliper.removeEventListener('mousedown', onMouseDown)
       viceCaliper.removeEventListener('touchstart', onMouseDown)
@@ -118,9 +127,12 @@ export default function VernierCaliperPage() {
 
   const reset = () => {
     setUserAnswer(0)
+    setMouseLeftMove(0)
+    setMouseTempLeftMove(0)
     onControllerHoldUp()
     setIsCorrect(false)
     setIsSubmitting(false)
+    setError(null)
     setResetCount(prev => prev + 1)
   }
 

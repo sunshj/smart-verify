@@ -33,14 +33,19 @@ export default function TouchCaptchaPage() {
   const [resetCount, setResetCount] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    createTouchCaptchaImage().then(({ image, answer, question }) => {
-      setImage(image)
-      setQuestion(question)
-      setAnswer(answer)
-    })
+    createTouchCaptchaImage()
+      .then(({ image, answer, question }) => {
+        setImage(image)
+        setQuestion(question)
+        setAnswer(answer)
+      })
+      .catch(error => setError(error))
   }, [resetCount])
+
+  if (error) throw error
 
   const pending = useMemo(() => !image, [image])
 
@@ -55,6 +60,7 @@ export default function TouchCaptchaPage() {
     setUserAnswer([])
     setIsCorrect(false)
     setIsSubmitting(false)
+    setError(null)
     setResetCount(prev => prev + 1)
   }
 

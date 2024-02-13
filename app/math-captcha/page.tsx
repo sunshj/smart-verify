@@ -33,18 +33,26 @@ export default function NumberPlusPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const pending = useMemo(() => !image, [image])
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    createMathCaptchaImage().then(({ image, answer }) => {
-      setImage(image)
-      setAnswer(answer)
-    })
+    createMathCaptchaImage()
+      .then(({ image, answer }) => {
+        setImage(image)
+        setAnswer(answer)
+      })
+      .catch(error => {
+        setError(error)
+      })
   }, [resetCount])
+
+  if (error) throw error
 
   const reset = () => {
     setUserAnswer('')
     setIsCorrect(false)
     setIsSubmitting(false)
+    setError(null)
     setResetCount(prev => prev + 1)
   }
 

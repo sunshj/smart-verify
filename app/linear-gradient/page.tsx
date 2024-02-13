@@ -14,17 +14,24 @@ export default function LinearGradientPage() {
   const [hashedColor, setHashedColor] = useState('')
   const [resetCount, setResetCount] = useState(0)
 
+  const [error, setError] = useState(null)
+
   const pending = useMemo(() => !image, [image])
 
   useEffect(() => {
-    createLinearGradientImage().then(({ image, hashedColor }) => {
-      setImage(image)
-      setHashedColor(hashedColor)
-    })
+    createLinearGradientImage()
+      .then(({ image, hashedColor }) => {
+        setImage(image)
+        setHashedColor(hashedColor)
+      })
+      .catch(error => setError(error))
   }, [resetCount])
+
+  if (error) throw error
 
   const reset = () => {
     setResetCount(prev => prev + 1)
+    setError(null)
   }
 
   const handleSubmit: ColorFormProps['onSubmit'] = useThrottle(async values => {
