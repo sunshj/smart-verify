@@ -126,6 +126,8 @@ export default function VernierCaliperPage() {
   }, [onMouseDown, onMouseMove, onMouseUp])
 
   const reset = () => {
+    setMainImage('')
+    setViceImage('')
     setUserAnswer(0)
     setMouseLeftMove(0)
     setMouseTempLeftMove(0)

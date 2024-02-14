@@ -57,6 +57,7 @@ export default function TouchCaptchaPage() {
   }
 
   const reset = () => {
+    setImage(undefined)
     setUserAnswer([])
     setIsCorrect(false)
     setIsSubmitting(false)

@@ -49,6 +49,7 @@ export default function NumberPlusPage() {
   if (error) throw error
 
   const reset = () => {
+    setImage(undefined)
     setUserAnswer('')
     setIsCorrect(false)
     setIsSubmitting(false)

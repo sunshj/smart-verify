@@ -30,6 +30,7 @@ export default function LinearGradientPage() {
   if (error) throw error
 
   const reset = () => {
+    setImage(undefined)
     setResetCount(prev => prev + 1)
     setError(null)
   }
