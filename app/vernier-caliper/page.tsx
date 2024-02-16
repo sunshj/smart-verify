@@ -1,5 +1,5 @@
 'use client'
-import { type SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { createConfetti } from '@/lib/confetti'
 import useThrottle from '@/lib/use-throttle'
+import PressedBox from '@/components/PressedBox'
 
 export default function VernierCaliperPage() {
   const [mainImage, setMainImage] = useState('')
@@ -33,27 +34,8 @@ export default function VernierCaliperPage() {
   const [mouseLeftMove, setMouseLeftMove] = useState(0)
 
   const viceCaliperRef = useRef<HTMLDivElement | null>(null)
-  const pressInterval = useRef<NodeJS.Timeout | null>(null)
 
   const pending = useMemo(() => !mainImage || !viceImage, [mainImage, viceImage])
-
-  const onLeftControllerHoldDown = (e: SyntheticEvent) => {
-    e.nativeEvent.preventDefault()
-    pressInterval.current = setInterval(() => {
-      setUserAnswer(prev => prev - 1)
-    }, 100)
-  }
-
-  const onRightControllerHoldDown = (e: SyntheticEvent) => {
-    e.nativeEvent.preventDefault()
-    pressInterval.current = setInterval(() => {
-      setUserAnswer(prev => prev + 1)
-    }, 100)
-  }
-
-  const onControllerHoldUp = () => {
-    if (pressInterval.current) clearInterval(pressInterval.current)
-  }
 
   const getX = (e: MouseEvent | TouchEvent) => {
     if (e && 'touches' in e) {
@@ -131,7 +113,6 @@ export default function VernierCaliperPage() {
     setUserAnswer(0)
     setMouseLeftMove(0)
     setMouseTempLeftMove(0)
-    onControllerHoldUp()
     setIsCorrect(false)
     setIsSubmitting(false)
     setError(null)
@@ -192,28 +173,22 @@ export default function VernierCaliperPage() {
                 />
               )}
             </div>
-            <button
-              className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
-              onMouseDown={onLeftControllerHoldDown}
-              onMouseUp={onControllerHoldUp}
-              onMouseLeave={onControllerHoldUp}
-              onTouchStart={onLeftControllerHoldDown}
-              onTouchEnd={onControllerHoldUp}
-              onClick={() => setUserAnswer(prev => prev - 1)}
-            >
-              ⬅
-            </button>
-            <button
-              className="absolute right-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
-              onMouseDown={onRightControllerHoldDown}
-              onMouseUp={onControllerHoldUp}
-              onMouseLeave={onControllerHoldUp}
-              onTouchStart={onRightControllerHoldDown}
-              onTouchEnd={onControllerHoldUp}
-              onClick={() => setUserAnswer(prev => prev + 1)}
-            >
-              ➡
-            </button>
+            <PressedBox interval={100} onPress={() => setUserAnswer(prev => prev - 1)}>
+              <button
+                className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
+                onClick={() => setUserAnswer(prev => prev - 1)}
+              >
+                ⬅
+              </button>
+            </PressedBox>
+            <PressedBox interval={100} onPress={() => setUserAnswer(prev => prev + 1)}>
+              <button
+                className="absolute right-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
+                onClick={() => setUserAnswer(prev => prev + 1)}
+              >
+                ➡
+              </button>
+            </PressedBox>
           </div>
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
