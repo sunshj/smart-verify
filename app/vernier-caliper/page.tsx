@@ -30,8 +30,9 @@ export default function VernierCaliperPage() {
 
   const [resetCount, setResetCount] = useState(0)
   const [isSelected, setIsSelected] = useState(false)
-  const [mouseTempLeftMove, setMouseTempLeftMove] = useState(0)
-  const [mouseLeftMove, setMouseLeftMove] = useState(0)
+
+  const mouseTempLeftMove = useRef(0)
+  const mouseLeftMove = useRef(0)
 
   const viceCaliperRef = useRef<HTMLDivElement | null>(null)
 
@@ -48,22 +49,24 @@ export default function VernierCaliperPage() {
   }
 
   const onMouseUp = useCallback(() => {
-    setMouseTempLeftMove(userAnswer)
+    if (mouseTempLeftMove.current === userAnswer) return
+    mouseTempLeftMove.current = userAnswer
+
     setIsSelected(false)
   }, [userAnswer])
 
   const onMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
     e.preventDefault()
-    setMouseLeftMove(getX(e))
+    mouseLeftMove.current = getX(e)
     setIsSelected(true)
   }, [])
 
   const onMouseMove = useCallback(
     (e: MouseEvent | TouchEvent) => {
       if (!isSelected) return
-      setUserAnswer(mouseTempLeftMove + getX(e) - mouseLeftMove)
+      setUserAnswer(mouseTempLeftMove.current + getX(e) - mouseLeftMove.current)
     },
-    [isSelected, mouseLeftMove, mouseTempLeftMove]
+    [isSelected]
   )
 
   useEffect(() => {
@@ -111,8 +114,8 @@ export default function VernierCaliperPage() {
     setMainImage('')
     setViceImage('')
     setUserAnswer(0)
-    setMouseLeftMove(0)
-    setMouseTempLeftMove(0)
+    mouseLeftMove.current = 0
+    mouseTempLeftMove.current = 0
     setIsCorrect(false)
     setIsSubmitting(false)
     setError(null)
@@ -173,7 +176,13 @@ export default function VernierCaliperPage() {
                 />
               )}
             </div>
-            <PressedBox interval={100} onPress={() => setUserAnswer(prev => prev - 1)}>
+            <PressedBox
+              interval={100}
+              onPress={() => {
+                setUserAnswer(prev => prev - 1)
+                mouseTempLeftMove.current--
+              }}
+            >
               <button
                 className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
                 onClick={() => setUserAnswer(prev => prev - 1)}
@@ -181,7 +190,13 @@ export default function VernierCaliperPage() {
                 ⬅
               </button>
             </PressedBox>
-            <PressedBox interval={100} onPress={() => setUserAnswer(prev => prev + 1)}>
+            <PressedBox
+              interval={100}
+              onPress={() => {
+                setUserAnswer(prev => prev + 1)
+                mouseTempLeftMove.current++
+              }}
+            >
               <button
                 className="absolute right-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
                 onClick={() => setUserAnswer(prev => prev + 1)}
