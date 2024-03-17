@@ -66,7 +66,7 @@ export async function createTouchCaptchaImage(): Promise<TouchCaptchaResult> {
     // 噪点密度控制
     if (Math.random() > noiseDensity) continue
     // 随机灰度噪点
-    const grayscale = Math.floor(Math.random() * (255 - 0) + 0)
+    const grayscale = randomIn(255, 0)
 
     Array.from({ length: randomIn(20, 2) })
       .fill(0)

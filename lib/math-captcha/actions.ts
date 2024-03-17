@@ -55,19 +55,22 @@ function generateFormula() {
   let formula = '' // 公式字符串
   let answer = 0 // 计算结果
 
-  const num1 = Math.floor(Math.random() * codeRange)
-  const num2 = Math.floor(Math.random() * codeRange)
-  const symbol = codeOperate[Math.floor(Math.random() * 2)] ?? '+'
+  const num1 = randomIn(codeRange, 0)
+  const num2 = randomIn(codeRange, 0)
+  const symbol = codeOperate[randomIn(codeOperate.length, 0)]
   if (symbol === '+') {
     formula = `${num1}+${num2}=?`
     answer = num1 + num2
-  } else {
+  } else if (symbol === '-') {
     if (num1 >= num2) {
       formula = `${num1}-${num2}=?`
     } else {
       formula = `${num2}-${num1}=?`
     }
     answer = Math.abs(num1 - num2)
+  } else if (symbol === '×') {
+    formula = `${num1}×${num2}=?`
+    answer = num1 * num2
   }
   return { formula, answer }
 }
