@@ -169,7 +169,7 @@ export default function VernierCaliperPage() {
               )}
               {!pending && (
                 <img
-                  className="absolute top-0 left-0 h-full w-full"
+                  className="absolute top-0 left-0 h-full w-full cursor-grab"
                   src={viceImage}
                   alt="vice-caliper-image"
                   style={{ left: `${userAnswer}px` }}
