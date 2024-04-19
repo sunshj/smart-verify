@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { createConfetti } from '@/lib/confetti'
-import useThrottle from '@/lib/use-throttle'
+import useThrottle from '@/lib/throttle'
 import PressedBox from '@/components/PressedBox'
 
 export default function VernierCaliperPage() {

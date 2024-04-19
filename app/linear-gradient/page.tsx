@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { compareHashedColor, createLinearGradientImage } from '@/lib/linear-gradient/actions'
 import ColorForm, { type ColorFormProps } from '@/components/ColorForm'
 import { createConfetti } from '@/lib/confetti'
-import useThrottle from '@/lib/use-throttle'
+import useThrottle from '@/lib/throttle'
 import type { LinearGradientCaptchaResult } from '@/lib/linear-gradient'
 
 export default function LinearGradientPage() {

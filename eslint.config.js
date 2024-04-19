@@ -7,7 +7,8 @@ module.exports = defineConfig([
   {
     files: ['**/components/ui/*.tsx'],
     rules: {
-      'react/prop-types': [2, { ignore: ['className'] }]
+      'react/prop-types': [2, { ignore: ['className'] }],
+      'react-refresh/only-export-components': 'off'
     }
   }
 ])

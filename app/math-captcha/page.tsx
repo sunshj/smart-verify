@@ -18,7 +18,7 @@ import {
   createMathCaptchaImage,
   verifyMathCaptcha
 } from '@/lib/math-captcha'
-import useThrottle from '@/lib/use-throttle'
+import useThrottle from '@/lib/throttle'
 import { createConfetti } from '@/lib/confetti'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
