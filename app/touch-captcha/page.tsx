@@ -1,12 +1,10 @@
 'use client'
-import { type MouseEventHandler, useEffect, useMemo, useState } from 'react'
+import { type MouseEventHandler, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import {
-  type CaptchaAnswer,
-  type TouchCaptchaResult,
   type UserAnswer,
   createTouchCaptchaImage,
   imageSize,
@@ -23,31 +21,16 @@ import {
 import { Button } from '@/components/ui/button'
 import { createConfetti } from '@/lib/confetti'
 import useThrottle from '@/lib/throttle'
+import { useAsyncData } from '@/lib/async-data'
 
 export default function TouchCaptchaPage() {
-  const [image, setImage] = useState<TouchCaptchaResult['image']>()
-  const [question, setQuestion] = useState<string[]>([])
-  const [answer, setAnswer] = useState<CaptchaAnswer[]>([])
+  const { data, error, pending, refresh } = useAsyncData(createTouchCaptchaImage)
   const [userAnswer, setUserAnswer] = useState<UserAnswer[]>([])
 
-  const [resetCount, setResetCount] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    createTouchCaptchaImage()
-      .then(({ image, answer, question }) => {
-        setImage(image)
-        setQuestion(question)
-        setAnswer(answer)
-      })
-      .catch(error => setError(error))
-  }, [resetCount])
 
   if (error) throw error
-
-  const pending = useMemo(() => !image, [image])
 
   const onTouchCaptchaClick: MouseEventHandler<HTMLImageElement> = e => {
     const { offsetX, offsetY, target } = e.nativeEvent
@@ -57,15 +40,15 @@ export default function TouchCaptchaPage() {
   }
 
   const reset = () => {
-    setImage(undefined)
     setUserAnswer([])
     setIsCorrect(false)
     setIsSubmitting(false)
-    setError(null)
-    setResetCount(prev => prev + 1)
+    refresh()
   }
 
   const submit = useThrottle(async () => {
+    if (!data) return
+    const { image, answer } = data
     if (userAnswer.length !== 3 || !image?.base64 || answer.length === 0)
       return toast.error('请先完成验证')
     setIsSubmitting(true)
@@ -88,7 +71,7 @@ export default function TouchCaptchaPage() {
         <CardHeader>
           <CardTitle>文字点选</CardTitle>
           <CardDescription>
-            请按顺序点击 <strong>{question?.join('、')}</strong>
+            请按顺序点击 <strong>{data?.question?.join('、')}</strong>
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col justify-center gap-2">
@@ -100,13 +83,13 @@ export default function TouchCaptchaPage() {
               Loading...
             </div>
           )}
-          {image && (
+          {!!data?.image && (
             <div className="relative flex justify-center">
               <Image
                 draggable={false}
-                src={image.base64}
-                width={image.width}
-                height={image.height}
+                src={data.image.base64}
+                width={data.image.width}
+                height={data.image.height}
                 onClick={onTouchCaptchaClick}
                 alt="touch-captcha"
               />

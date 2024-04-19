@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,55 +12,34 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
-import {
-  type MathCaptchaResult,
-  codeHeight,
-  createMathCaptchaImage,
-  verifyMathCaptcha
-} from '@/lib/math-captcha'
+import { codeHeight, createMathCaptchaImage, verifyMathCaptcha } from '@/lib/math-captcha'
 import useThrottle from '@/lib/throttle'
 import { createConfetti } from '@/lib/confetti'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useAsyncData } from '@/lib/async-data'
 
 export default function NumberPlusPage() {
-  const [image, setImage] = useState<MathCaptchaResult['image']>()
-  const [answer, setAnswer] = useState<string>('')
-  const [userAnswer, setUserAnswer] = useState<string>('')
+  const { data, error, pending, refresh } = useAsyncData(createMathCaptchaImage)
 
-  const [resetCount, setResetCount] = useState(0)
+  const [userAnswer, setUserAnswer] = useState<string>('')
   const [isCorrect, setIsCorrect] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const pending = useMemo(() => !image, [image])
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    createMathCaptchaImage()
-      .then(({ image, answer }) => {
-        setImage(image)
-        setAnswer(answer)
-      })
-      .catch(error => {
-        setError(error)
-      })
-  }, [resetCount])
 
   if (error) throw error
 
   const reset = () => {
-    setImage(undefined)
     setUserAnswer('')
     setIsCorrect(false)
     setIsSubmitting(false)
-    setError(null)
-    setResetCount(prev => prev + 1)
+    refresh()
   }
 
   const submit = useThrottle(async () => {
+    if (!data) return
     if (!userAnswer) return toast.error('请输入答案')
     setIsSubmitting(true)
-    const result = await verifyMathCaptcha(Number(userAnswer), answer).finally(() =>
+    const result = await verifyMathCaptcha(Number(userAnswer), data.answer).finally(() =>
       setIsSubmitting(false)
     )
     if (!result) {
@@ -89,13 +68,13 @@ export default function NumberPlusPage() {
               Loading...
             </div>
           )}
-          {image && (
+          {!!data?.image && (
             <div className="relative flex justify-center">
               <Image
                 draggable={false}
-                src={image.base64}
-                width={image.width}
-                height={image.height}
+                src={data.image.base64}
+                width={data.image.width}
+                height={data.image.height}
                 alt="math-captcha"
               />
             </div>

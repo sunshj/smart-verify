@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
@@ -16,27 +16,20 @@ import { Button } from '@/components/ui/button'
 import { createConfetti } from '@/lib/confetti'
 import useThrottle from '@/lib/throttle'
 import PressedBox from '@/components/PressedBox'
+import { useAsyncData } from '@/lib/async-data'
 
 export default function VernierCaliperPage() {
-  const [mainImage, setMainImage] = useState('')
-  const [viceImage, setViceImage] = useState('')
-  const [question, setQuestion] = useState('')
-  const [answers, setAnswers] = useState<string[]>([])
+  const { data, error, pending, refresh } = useAsyncData(createVernierCaliperImage)
 
   const [userAnswer, setUserAnswer] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState(null)
-
-  const [resetCount, setResetCount] = useState(0)
   const [isSelected, setIsSelected] = useState(false)
 
   const mouseTempLeftMove = useRef(0)
   const mouseLeftMove = useRef(0)
 
   const viceCaliperRef = useRef<HTMLDivElement | null>(null)
-
-  const pending = useMemo(() => !mainImage || !viceImage, [mainImage, viceImage])
 
   const getX = (e: MouseEvent | TouchEvent) => {
     if (e && 'touches' in e) {
@@ -69,17 +62,6 @@ export default function VernierCaliperPage() {
     [isSelected]
   )
 
-  useEffect(() => {
-    createVernierCaliperImage()
-      .then(({ mainImageBase64, viceImageBase64, question, answers }) => {
-        setMainImage(mainImageBase64)
-        setViceImage(viceImageBase64)
-        setQuestion(question)
-        setAnswers(answers)
-      })
-      .catch(error => setError(error))
-  }, [resetCount])
-
   if (error) throw error
 
   useEffect(() => {
@@ -111,20 +93,20 @@ export default function VernierCaliperPage() {
   }, [onMouseDown, onMouseMove, onMouseUp])
 
   const reset = () => {
-    setMainImage('')
-    setViceImage('')
     setUserAnswer(0)
     mouseLeftMove.current = 0
     mouseTempLeftMove.current = 0
     setIsCorrect(false)
     setIsSubmitting(false)
-    setError(null)
-    setResetCount(prev => prev + 1)
+    refresh()
   }
 
   const submit = useThrottle(async () => {
+    if (!data) return
     setIsSubmitting(true)
-    const result = await verifyAnswer(userAnswer, answers).finally(() => setIsSubmitting(false))
+    const result = await verifyAnswer(userAnswer, data.answers).finally(() =>
+      setIsSubmitting(false)
+    )
     if (!result) {
       setIsCorrect(false)
       reset()
@@ -141,7 +123,7 @@ export default function VernierCaliperPage() {
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>游标卡尺</CardTitle>
-          <CardDescription>拖动副尺使游标卡尺的读数为 {question}</CardDescription>
+          <CardDescription>拖动副尺使游标卡尺的读数为 {data?.question}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <div className="w-full overflow-hidden relative">
@@ -155,7 +137,7 @@ export default function VernierCaliperPage() {
                 <img
                   draggable={false}
                   loading="lazy"
-                  src={mainImage}
+                  src={data?.mainImageBase64}
                   alt="main-caliper-image"
                   className="absolute top-0 left-0 h-full w-full"
                 />
@@ -170,7 +152,7 @@ export default function VernierCaliperPage() {
               {!pending && (
                 <img
                   className="absolute top-0 left-0 h-full w-full cursor-grab"
-                  src={viceImage}
+                  src={data?.viceImageBase64}
                   alt="vice-caliper-image"
                   style={{ left: `${userAnswer}px` }}
                 />

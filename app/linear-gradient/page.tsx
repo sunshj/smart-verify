@@ -1,5 +1,4 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,39 +6,19 @@ import { compareHashedColor, createLinearGradientImage } from '@/lib/linear-grad
 import ColorForm, { type ColorFormProps } from '@/components/ColorForm'
 import { createConfetti } from '@/lib/confetti'
 import useThrottle from '@/lib/throttle'
-import type { LinearGradientCaptchaResult } from '@/lib/linear-gradient'
+import { useAsyncData } from '@/lib/async-data'
 
 export default function LinearGradientPage() {
-  const [image, setImage] = useState<LinearGradientCaptchaResult['image']>()
-  const [hashedColor, setHashedColor] = useState('')
-  const [resetCount, setResetCount] = useState(0)
-
-  const [error, setError] = useState(null)
-
-  const pending = useMemo(() => !image, [image])
-
-  useEffect(() => {
-    createLinearGradientImage()
-      .then(({ image, hashedColor }) => {
-        setImage(image)
-        setHashedColor(hashedColor)
-      })
-      .catch(error => setError(error))
-  }, [resetCount])
+  const { data, error, pending, refresh } = useAsyncData(createLinearGradientImage)
 
   if (error) throw error
 
-  const reset = () => {
-    setImage(undefined)
-    setResetCount(prev => prev + 1)
-    setError(null)
-  }
-
   const handleSubmit: ColorFormProps['onSubmit'] = useThrottle(async values => {
-    const success = await compareHashedColor(Object.values(values).join('-'), hashedColor)
+    if (!data) return false
+    const success = await compareHashedColor(Object.values(values).join('-'), data?.hashedColor)
     if (!success) {
       toast.error('验证失败，已重置')
-      reset()
+      refresh()
     } else {
       toast.success('验证通过')
       createConfetti()
@@ -61,13 +40,13 @@ export default function LinearGradientPage() {
                 加载中...
               </div>
             )}
-            {image && (
+            {!!data?.image && (
               <Image
                 draggable={false}
                 className="w-full h-full rounded-sm"
-                src={image?.base64}
-                width={image?.width}
-                height={image?.height}
+                src={data.image?.base64}
+                width={data.image?.width}
+                height={data.image?.height}
                 alt="linear-gradient-image"
               />
             )}
