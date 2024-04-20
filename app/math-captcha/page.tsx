@@ -102,7 +102,7 @@ export default function NumberPlusPage() {
             </Button>
           )}
           {isCorrect && (
-            <Link href="/slide-captcha" scroll={false}>
+            <Link href="/touch-captcha" scroll={false}>
               <Button>下一个</Button>
             </Link>
           )}
