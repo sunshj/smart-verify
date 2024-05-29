@@ -62,6 +62,9 @@ dependencies:
   tailwindcss-animate:
     specifier: ^1.0.7
     version: 1.0.7(tailwindcss@3.4.1)
+  vernier-caliper:
+    specifier: ^0.2.0
+    version: 0.2.0(react@18.2.0)
   zod:
     specifier: ^3.22.4
     version: 3.22.4
@@ -3675,6 +3678,18 @@ packages:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
     dev: true
+
+  /vernier-caliper@0.2.0(react@18.2.0):
+    resolution: {integrity: sha512-6zOfhppbJzwSQOhGCoNzPSbvveC6UCxvWKMj9QLj8efFJd3XP7L1phq1IU6NYD7ttRmpbkUc5XvureWUa8UqWg==}
+    peerDependencies:
+      react: '>=18'
+    dependencies:
+      canvas: 2.11.2
+      react: 18.2.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: false
 
   /vue-eslint-parser@9.4.2(eslint@8.56.0):
     resolution: {integrity: sha512-Ry9oiGmCAK91HrKMtCrKFWmSFWvYkpGglCeFAIqDdr9zdXmMMpJOmUJS7WWsW7fX81h6mwHmUZCQQ1E0PkSwYQ==}

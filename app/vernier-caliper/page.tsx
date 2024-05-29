@@ -1,9 +1,10 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
-import { createVernierCaliperImage, verifyAnswer } from '@/lib/vernier-caliper'
+import VernierCaliper from 'vernier-caliper'
+import { createVernierCaliper, verifyAnswer } from 'vernier-caliper/actions'
 import {
   Card,
   CardContent,
@@ -15,87 +16,19 @@ import {
 import { Button } from '@/components/ui/button'
 import { createConfetti } from '@/lib/confetti'
 import useThrottle from '@/lib/throttle'
-import PressedBox from '@/components/PressedBox'
 import { useAsyncData } from '@/lib/async-data'
 
 export default function VernierCaliperPage() {
-  const { data, error, pending, refresh } = useAsyncData(createVernierCaliperImage)
+  const { data, error, pending, refresh } = useAsyncData(createVernierCaliper)
 
   const [userAnswer, setUserAnswer] = useState(0)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSelected, setIsSelected] = useState(false)
-
-  const mouseTempLeftMove = useRef(0)
-  const mouseLeftMove = useRef(0)
-
-  const viceCaliperRef = useRef<HTMLDivElement | null>(null)
-
-  const getX = (e: MouseEvent | TouchEvent) => {
-    if (e && 'touches' in e) {
-      return e.touches[0].screenX
-    }
-    if (e && 'screenX' in e) {
-      return e.screenX
-    }
-    return 0
-  }
-
-  const onMouseUp = useCallback(() => {
-    if (mouseTempLeftMove.current === userAnswer) return
-    mouseTempLeftMove.current = userAnswer
-
-    setIsSelected(false)
-  }, [userAnswer])
-
-  const onMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
-    e.preventDefault()
-    mouseLeftMove.current = getX(e)
-    setIsSelected(true)
-  }, [])
-
-  const onMouseMove = useCallback(
-    (e: MouseEvent | TouchEvent) => {
-      if (!isSelected) return
-      setUserAnswer(mouseTempLeftMove.current + getX(e) - mouseLeftMove.current)
-    },
-    [isSelected]
-  )
 
   if (error) throw error
 
-  useEffect(() => {
-    const viceCaliper = viceCaliperRef.current
-    if (!viceCaliper) return
-
-    viceCaliper.addEventListener('mouseup', onMouseUp)
-    viceCaliper.addEventListener('touchend', onMouseUp, { passive: false })
-
-    viceCaliper.addEventListener('mouseleave', onMouseUp)
-
-    viceCaliper.addEventListener('mousedown', onMouseDown)
-    viceCaliper.addEventListener('touchstart', onMouseDown, { passive: false })
-
-    viceCaliper.addEventListener('mousemove', onMouseMove)
-    viceCaliper.addEventListener('touchmove', onMouseMove, { passive: false })
-
-    return () => {
-      viceCaliper.removeEventListener('mouseup', onMouseUp)
-      viceCaliper.removeEventListener('touchend', onMouseUp)
-      viceCaliper.removeEventListener('mouseleave', onMouseUp)
-
-      viceCaliper.removeEventListener('mousedown', onMouseDown)
-      viceCaliper.removeEventListener('touchstart', onMouseDown)
-
-      viceCaliper.removeEventListener('mousemove', onMouseMove)
-      viceCaliper.removeEventListener('touchmove', onMouseMove)
-    }
-  }, [onMouseDown, onMouseMove, onMouseUp])
-
   const reset = () => {
     setUserAnswer(0)
-    mouseLeftMove.current = 0
-    mouseTempLeftMove.current = 0
     setIsCorrect(false)
     setIsSubmitting(false)
     refresh()
@@ -126,67 +59,12 @@ export default function VernierCaliperPage() {
           <CardDescription>拖动副尺使游标卡尺的读数为 {data?.question}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <div className="w-full overflow-hidden relative">
-            <div className="relative h-10">
-              {pending && (
-                <div className="animate-pulse flex justify-center items-center h-full">
-                  加载主尺中...
-                </div>
-              )}
-              {!pending && (
-                <img
-                  draggable={false}
-                  loading="lazy"
-                  src={data?.mainImageBase64}
-                  alt="main-caliper-image"
-                  className="absolute top-0 left-0 h-full w-full"
-                />
-              )}
-            </div>
-            <div className="relative h-10" ref={viceCaliperRef}>
-              {pending && (
-                <div className="animate-pulse flex justify-center items-center h-full">
-                  加载副尺中...
-                </div>
-              )}
-              {!pending && (
-                <img
-                  className="absolute top-0 left-0 h-full w-full cursor-grab"
-                  src={data?.viceImageBase64}
-                  alt="vice-caliper-image"
-                  style={{ left: `${userAnswer}px` }}
-                />
-              )}
-            </div>
-            <PressedBox
-              interval={100}
-              onPress={() => {
-                setUserAnswer(prev => prev - 1)
-                mouseTempLeftMove.current--
-              }}
-            >
-              <button
-                className="absolute left-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
-                onClick={() => setUserAnswer(prev => prev - 1)}
-              >
-                ⬅
-              </button>
-            </PressedBox>
-            <PressedBox
-              interval={100}
-              onPress={() => {
-                setUserAnswer(prev => prev + 1)
-                mouseTempLeftMove.current++
-              }}
-            >
-              <button
-                className="absolute right-1 bottom-1 p-1 rounded-md hover:bg-indigo-300 hover:bg-opacity-60 animate-in animate-out delay-150 select-none"
-                onClick={() => setUserAnswer(prev => prev + 1)}
-              >
-                ➡
-              </button>
-            </PressedBox>
-          </div>
+          <VernierCaliper
+            loading={pending}
+            mainCaliperImage={data?.mainCaliperImage}
+            viceCaliperImage={data?.viceCaliperImage}
+            onChange={setUserAnswer}
+          />
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
           <Button disabled={pending} variant="secondary" onClick={reset}>

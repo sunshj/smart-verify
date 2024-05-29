@@ -40,6 +40,7 @@ function addGridOrDotForBg({ matchUtilities, theme }: any) {
 const config = {
   darkMode: ['class'],
   content: [
+    './node_modules/vernier-caliper/dist/*.js',
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
